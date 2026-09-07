@@ -7,6 +7,17 @@ class RubiksCube:
         https://kociemba.org/math/CubeDefs.htm - Move definitions
     """
 
+    CORNERS = [
+        "URF", "UFL", "ULB", "UBR",  # 0  1  2  3
+        "DFR", "DLF", "DBL", "DRB",  # 4  5  6  7
+    ]
+
+    EDGES = [
+        "UR", "UF", "UL", "UB",  # 0  1  2  3
+        "DR", "DF", "DL", "DB",  # 4  5  6  7
+        "FR", "FL", "BL", "BR",  # 8  9  10 11
+    ]
+
     def __init__(self):
         """Sets current state to that of a solved cube"""
         self.corner_position = np.arange(8, dtype=np.int8) # arr length 8, val 0-7
