@@ -22,3 +22,14 @@ class RubiksCube:
             np.array_equal( self.edge_position, np.arange(12) ) and
             np.array_equal( self.edge_orientation, np.zeros(12) )
         )
+
+    def __repr__(self):
+        """Returns string representation of current cube state"""
+        return (
+            f"RubiksCube(\n"
+            f"  corners: {self.corner_position}\n"
+            f"  corner orientation: {self.corner_orientation}\n"
+            f"  edges: {self.edge_position}\n"
+            f"  edge orientation: {self.edge_orientation}\n"
+            f")"
+        )
