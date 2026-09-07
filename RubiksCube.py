@@ -23,8 +23,8 @@ class RubiksCube:
 
     MOVES
         Moves are always clockwise. A counterclockwise move is denoted with a ' (ex: R')
-        and is is achieved by doing 3 reference moves sequentially. A 180 degree move is 
-        denoted with a 2 (ex: R2) and is achieved by doing 2 reference moves sequentially. 
+        and is is achieved by doing 3 clockwise moves sequentially. A 180 degree move is 
+        denoted with a 2 (ex: R2) and is achieved by doing 2 clockwise moves sequentially. 
 
     """
 
@@ -134,7 +134,7 @@ class RubiksCube:
             # 180 degree turn - apply clockwise move 2 times
             self.move(move=face)
             self.move(move=face)
-            
+
         elif move.endswith("'"):
             # counterclockwise turn - apply clockwise move 3 times
             self.move(move=face)
