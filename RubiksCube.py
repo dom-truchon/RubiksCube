@@ -6,6 +6,27 @@ class RubiksCube:
         https://kociemba.org/cube.htm - Logic
         https://kociemba.org/math/CubeDefs.htm - Move definitions
     """
+    """
+    ORIENTATION
+        Corners:    0: correctly oriented
+                    1: twisted clockwise
+                    2: twisted anticlockwise
+
+        Edges:      0: correctly oriented
+                    1: flipped
+
+        Each cube has a reference sticker:
+            U/D face sticker for cubies in the top/bottom row
+            F/B face sticker for cubies in the middle row (edge pieces)
+        The value shows which state the cubie is in. Corners have 3 possible states,
+        while edge pieces have 2 possible states.
+
+    MOVES
+        Moves are always clockwise. A counterclockwise move is denoted with a ' (ex: R')
+        and is is achieved by doing 3 reference moves sequentially. A 180 degree move is 
+        denoted with a 2 (ex: R2) and is achieved by doing 2 reference moves sequentially. 
+
+    """
 
     CORNERS = [
         "URF", "UFL", "ULB", "UBR",  # 0  1  2  3
