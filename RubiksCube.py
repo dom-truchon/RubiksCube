@@ -8,7 +8,7 @@ class RubiksCube:
     """
 
     def __init__(self):
-        # Solved cube
+        """Sets current state to that of a solved cube"""
         self.corner_position = np.arange(8, dtype=np.int8) # arr length 8, val 0-7
         self.corner_orientation = np.zeros(8, dtype=np.int8) # arr length 8, val 0s
         self.edge_position = np.arange(12, dtype=np.int8) # arr length 12, val 0-11
