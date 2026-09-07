@@ -18,6 +18,45 @@ class RubiksCube:
         "FR", "FL", "BL", "BR",  # 8  9  10 11
     ]
 
+    MOVES = {
+        "R": { # Right face
+            "corner_position": [ 4, 1, 2, 0, 7, 5, 6, 3 ], # 0>3 3>7 7>4 4>0
+            "corner_orientation": [ 2, 0, 0, 1, 1, 0, 0, 2 ],
+            "edge_position": [ 8, 1, 2, 3, 11, 5, 6, 7, 4, 9, 10, 0 ], # 8>0 0>11 11>4 4>8
+            "edge_orientation": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] 
+        }, 
+        "L": { # Left face #TODO
+            "corner_position": ...,
+            "corner_orientation": ...,
+            "edge_position": ...,
+            "edge_orientation": ...
+        }, 
+        "U": { # Top face #TODO
+            "corner_position": ...,
+            "corner_orientation": ...,
+            "edge_position": ...,
+            "edge_orientation": ...
+        }, 
+        "D": { # Bottom face #TODO
+            "corner_position": ...,
+            "corner_orientation": ...,
+            "edge_position": ...,
+            "edge_orientation": ...
+        }, 
+        "F": { # Front face #TODO
+            "corner_position": ...,
+            "corner_orientation": ...,
+            "edge_position": ...,
+            "edge_orientation": ...
+        }, 
+        "B": { # Back face #TODO
+            "corner_position": ...,
+            "corner_orientation": ...,
+            "edge_position": ...,
+            "edge_orientation": ...
+        }, 
+    }
+
     def __init__(self):
         """Sets current state to that of a solved cube"""
         self.corner_position = np.arange(8, dtype=np.int8) # arr length 8, val 0-7
@@ -56,3 +95,30 @@ class RubiksCube:
         cube.edge_orientation = self.edge_orientation.copy()
 
         return cube
+
+    def move(self, face):
+        """
+        Rotate specified face in the clockwise direction
+
+        Valid faces are "U", "D", "F", "B", "R", and "L"
+        A face value followed by a "'" (ex: U') indicates a counterclockwise turn
+        A face value followed by a "2" (ex: U2) indicates a 180 degree turn
+        
+        Counterclockwise turns are achieved with 3 sequential clockwise face moves
+        180 degree turns are achieved with 2 sequential clockwise face moves
+        """
+
+        # TODO - handle counterclockwise and 180 degree moves
+
+        cp = self.MOVES[face]["corner_position"]
+        co = self.MOVES[face]["corner_orientation"]
+        ep = self.MOVES[face]["edge_position"]
+        eo = self.MOVES[face]["edge_orientation"]
+
+        # update positions
+        self.corner_position = self.corner_position[cp]
+        self.edge_position = self.edge_position[ep]
+
+        # orientation - apply new position -> add orientation change -> trim
+        self.corner_orientation = (self.corner_orientation[cp] + co) % 3
+        self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
