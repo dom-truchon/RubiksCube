@@ -33,3 +33,15 @@ class RubiksCube:
             f"  edge orientation: {self.edge_orientation}\n"
             f")"
         )
+
+    def copy(self):
+        """Returns a new RubiksCube with the state of the current cube"""
+        cube = RubiksCube()
+
+        cube.corner_position = self.corner_position.copy()
+        cube.corner_orientation = self.corner_orientation.copy()
+
+        cube.edge_position = self.edge_position.copy()
+        cube.edge_orientation = self.edge_orientation.copy()
+
+        return cube
