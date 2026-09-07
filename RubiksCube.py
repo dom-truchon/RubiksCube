@@ -117,9 +117,9 @@ class RubiksCube:
 
         return cube
 
-    def move(self, face):
+    def move(self, move):
         """
-        Rotate specified face in the clockwise direction
+        Rotate face specified in 'move' in the clockwise direction
 
         Valid faces are "U", "D", "F", "B", "R", and "L"
         A face value followed by a "'" (ex: U') indicates a counterclockwise turn
@@ -129,17 +129,29 @@ class RubiksCube:
         180 degree turns are achieved with 2 sequential clockwise face moves
         """
 
-        # TODO - handle counterclockwise and 180 degree moves
+        face = move[0]
+        if move.endswith("2"):
+            # 180 degree turn - apply clockwise move 2 times
+            self.move(move=face)
+            self.move(move=face)
+            
+        elif move.endswith("'"):
+            # counterclockwise turn - apply clockwise move 3 times
+            self.move(move=face)
+            self.move(move=face)
+            self.move(move=face)
+            
+        else:
+            # apply clockwise turn
+            cp = self.MOVES[move]["corner_position"]
+            co = self.MOVES[move]["corner_orientation"]
+            ep = self.MOVES[move]["edge_position"]
+            eo = self.MOVES[move]["edge_orientation"]
 
-        cp = self.MOVES[face]["corner_position"]
-        co = self.MOVES[face]["corner_orientation"]
-        ep = self.MOVES[face]["edge_position"]
-        eo = self.MOVES[face]["edge_orientation"]
+            # update positions
+            self.corner_position = self.corner_position[cp]
+            self.edge_position = self.edge_position[ep]
 
-        # update positions
-        self.corner_position = self.corner_position[cp]
-        self.edge_position = self.edge_position[ep]
-
-        # orientation - apply new position -> add orientation change -> trim
-        self.corner_orientation = (self.corner_orientation[cp] + co) % 3
-        self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
+            # orientation - apply new position -> add orientation change -> trim
+            self.corner_orientation = (self.corner_orientation[cp] + co) % 3
+            self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
