@@ -14,4 +14,11 @@ class RubiksCube:
         self.edge_position = np.arange(12, dtype=np.int8) # arr length 12, val 0-11
         self.edge_orientation = np.zeros(12, dtype=np.int8) # arr length 12, val 0s
 
-    
+    def is_solved(self):
+        """Compares current state to initial (solved) state"""
+        return (
+            np.array_equal( self.corner_position, np.arange(8) ) and
+            np.array_equal( self.corner_orientation, np.zeros(8) ) and
+            np.array_equal( self.edge_position, np.arange(12) ) and
+            np.array_equal( self.edge_orientation, np.zeros(12) )
+        )
