@@ -46,35 +46,35 @@ class RubiksCube:
             "edge_position": [ 8, 1, 2, 3, 11, 5, 6, 7, 4, 9, 10, 0 ], # 8>0 0>11 11>4 4>8
             "edge_orientation": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] 
         }, 
-        "L": { # Left face #TODO
-            "corner_position": ...,
-            "corner_orientation": ...,
-            "edge_position": ...,
-            "edge_orientation": ...
+        "L": { # Left face
+            "corner_position": [0, 2, 6, 3, 4, 1, 5, 7],
+            "corner_orientation": [0, 1, 2, 0, 0, 2, 1, 0],
+            "edge_position": [0, 1, 10, 3, 4, 5, 9, 7, 8, 2, 6, 11],
+            "edge_orientation": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }, 
-        "U": { # Top face #TODO
-            "corner_position": ...,
-            "corner_orientation": ...,
-            "edge_position": ...,
-            "edge_orientation": ...
+        "U": { # Top face
+             "corner_position": [3, 0, 1, 2, 4, 5, 6, 7],
+            "corner_orientation": [0, 0, 0, 0, 0, 0, 0, 0],
+            "edge_position": [3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11],
+            "edge_orientation": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }, 
-        "D": { # Bottom face #TODO
-            "corner_position": ...,
-            "corner_orientation": ...,
-            "edge_position": ...,
-            "edge_orientation": ...
+        "D": { # Bottom face
+            "corner_position": [0, 1, 2, 3, 5, 6, 7, 4],
+            "corner_orientation": [0, 0, 0, 0, 0, 0, 0, 0],
+            "edge_position": [0, 1, 2, 3, 5, 6, 7, 4, 8, 9, 10, 11],
+            "edge_orientation": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }, 
-        "F": { # Front face #TODO
-            "corner_position": ...,
-            "corner_orientation": ...,
-            "edge_position": ...,
-            "edge_orientation": ...
+        "F": { # Front face
+           "corner_position": [1, 5, 2, 3, 0, 4, 6, 7],
+            "corner_orientation": [1, 2, 0, 0, 2, 1, 0, 0],
+            "edge_position": [0, 9, 2, 3, 4, 8, 6, 7, 1, 5, 10, 11],
+            "edge_orientation": [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0]
         }, 
-        "B": { # Back face #TODO
-            "corner_position": ...,
-            "corner_orientation": ...,
-            "edge_position": ...,
-            "edge_orientation": ...
+        "B": { # Back face
+            "corner_position": [0, 1, 3, 7, 4, 5, 2, 6],
+            "corner_orientation": [0, 0, 1, 2, 0, 0, 2, 1],
+            "edge_position": [0, 1, 2, 11, 4, 5, 6, 10, 8, 9, 3, 7],
+            "edge_orientation": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1]
         }, 
     }
 
@@ -137,15 +137,12 @@ class RubiksCube:
         180 degree turns are achieved with 2 sequential clockwise face moves
         """
 
-        face = move[0]
         if move.endswith("2"):
             # 180 degree turn - apply clockwise move 2 times
             turns = 2
-
         elif move.endswith("'"):
             # counterclockwise turn - apply clockwise move 3 times
             turns = 3
-            
         else:
             # single turn
             turns = 1
@@ -154,6 +151,7 @@ class RubiksCube:
         self.path.append(move)
         
         # apply clockwise turn(s)
+        face = move[0]
         for i in range(turns):
             cp = self.MOVES[face]["corner_position"]
             co = self.MOVES[face]["corner_orientation"]
@@ -164,6 +162,8 @@ class RubiksCube:
             self.corner_position = self.corner_position[cp]
             self.edge_position = self.edge_position[ep]
 
-            # orientation - apply new position -> add orientation change -> trim
+            # update orientation - apply new position -> add orientation change -> trim
             self.corner_orientation = (self.corner_orientation[cp] + co) % 3
             self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
+
+
