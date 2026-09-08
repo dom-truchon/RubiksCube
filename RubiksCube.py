@@ -78,12 +78,15 @@ class RubiksCube:
         }, 
     }
 
+
     def __init__(self):
         """Sets current state to that of a solved cube"""
         self.corner_position = np.arange(8, dtype=np.int8) # arr length 8, val 0-7
         self.corner_orientation = np.zeros(8, dtype=np.int8) # arr length 8, val 0s
         self.edge_position = np.arange(12, dtype=np.int8) # arr length 12, val 0-11
         self.edge_orientation = np.zeros(12, dtype=np.int8) # arr length 12, val 0s
+        self.path = []
+
 
     def is_solved(self):
         """Compares current state to initial (solved) state"""
@@ -93,6 +96,7 @@ class RubiksCube:
             np.array_equal( self.edge_position, np.arange(12) ) and
             np.array_equal( self.edge_orientation, np.zeros(12) )
         )
+
 
     def __repr__(self):
         """Returns string representation of current cube state"""
@@ -105,6 +109,7 @@ class RubiksCube:
             f")"
         )
 
+
     def copy(self):
         """Returns a new RubiksCube with the state of the current cube"""
         cube = RubiksCube()
@@ -115,11 +120,14 @@ class RubiksCube:
         cube.edge_position = self.edge_position.copy()
         cube.edge_orientation = self.edge_orientation.copy()
 
+        cube.path = self.path.copy()
+
         return cube
+
 
     def move(self, move):
         """
-        Rotate face specified in 'move' in the clockwise direction
+        Rotate face specified in 'move' in 90 degree clockwise turns
 
         Valid faces are "U", "D", "F", "B", "R", and "L"
         A face value followed by a "'" (ex: U') indicates a counterclockwise turn
@@ -132,17 +140,21 @@ class RubiksCube:
         face = move[0]
         if move.endswith("2"):
             # 180 degree turn - apply clockwise move 2 times
-            self.move(move=face)
-            self.move(move=face)
+            turns = 2
 
         elif move.endswith("'"):
             # counterclockwise turn - apply clockwise move 3 times
-            self.move(move=face)
-            self.move(move=face)
-            self.move(move=face)
+            turns = 3
             
         else:
-            # apply clockwise turn
+            # single turn
+            turns = 1
+
+        # Update path
+        self.path.append(move)
+        
+        # apply clockwise turn(s)
+        for i in range(turns):
             cp = self.MOVES[move]["corner_position"]
             co = self.MOVES[move]["corner_orientation"]
             ep = self.MOVES[move]["edge_position"]
