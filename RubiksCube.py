@@ -155,10 +155,10 @@ class RubiksCube:
         
         # apply clockwise turn(s)
         for i in range(turns):
-            cp = self.MOVES[move]["corner_position"]
-            co = self.MOVES[move]["corner_orientation"]
-            ep = self.MOVES[move]["edge_position"]
-            eo = self.MOVES[move]["edge_orientation"]
+            cp = self.MOVES[face]["corner_position"]
+            co = self.MOVES[face]["corner_orientation"]
+            ep = self.MOVES[face]["edge_position"]
+            eo = self.MOVES[face]["edge_orientation"]
 
             # update positions
             self.corner_position = self.corner_position[cp]
