@@ -56,10 +56,14 @@ class RubiksCube {
 
     constructor() {
         this.cubies = [];
+        this.moveQueue = [];
+        this.isAnimating = false;
 
         sceneController.clearAllMeshes();
 
-        // +z = front, -z = back, +x = right, -x = left, +y = top, -y = bottom
+        // +z = F, -z = B
+        // +x = R, -x = L
+        // +y = U, -y = D
         
         for(let x = -1; x <= 1; x++) {
             for(let y = -1; y <= 1; y++) {
@@ -74,10 +78,9 @@ class RubiksCube {
                     let color__Z = (z === 1) ? 0x00FF00 : (z === -1) ? 0x0000FF : color; // Green for front, blue for back, else black
 
                     // Create stickers for each face
-                    let sticker_X = (x !== 0) ? sceneController.createCube((x*0.475), 0, 0, 0.1, 0.9, 0.9, color__X, undefined, false) : false; // R/L sticker
-                    let sticker_Y = (y !== 0) ? sceneController.createCube(0, (y*0.475), 0, 0.9, 0.1, 0.9, color__Y, undefined, false) : false; // F/B sticker
-                    let sticker_Z = (z !== 0) ? sceneController.createCube(0, 0, (z*0.475), 0.9, 0.9, 0.1, color__Z, undefined, false) : false; // U/D sticker
-
+                    let sticker_X = (x !== 0) ? sceneController.createCube((x*0.46), 0, 0, 0.1, 0.9, 0.9, color__X, undefined, false) : false; // R/L sticker
+                    let sticker_Y = (y !== 0) ? sceneController.createCube(0, (y*0.46), 0, 0.9, 0.1, 0.9, color__Y, undefined, false) : false; // F/B sticker
+                    let sticker_Z = (z !== 0) ? sceneController.createCube(0, 0, (z*0.46), 0.9, 0.9, 0.1, color__Z, undefined, false) : false; // U/D sticker
                     if(sticker_X) cubie.add(sticker_X);
                     if(sticker_Y) cubie.add(sticker_Y);
                     if(sticker_Z) cubie.add(sticker_Z);   
@@ -89,6 +92,16 @@ class RubiksCube {
     }
 
     move(face) {
+        if(face) this.moveQueue.push(face);
+        if(this.isAnimating) return;
+        if(this.moveQueue.length === 0) return;
+
+        const nextMove = this.moveQueue.shift();
+
+        this.processNextMove(nextMove);
+    }
+
+    processNextMove(face) {
         const faceMap = {
             'L': { axis: 'x', value: -1 }, // Left
             'R': { axis: 'x', value: 1 }, // Right
@@ -98,7 +111,11 @@ class RubiksCube {
             'F': { axis: 'z', value: 1 }, // Front
         };
 
-        const faceInfo = faceMap[face]; 
+        const faceInfo = faceMap[face[0]]; // Get the first character of the face string
+        const direction = face[1] === "'" ? -1 : 1; // If the second character is a prime symbol, rotate counter-clockwise
+        const distance = face[1] === "2" ? 2 : 1; // If the third character is "2", rotate 180 degrees
+        const angle = direction * (Math.PI / 2) * distance; // 90 degrees in radians, adjusted for direction and distance
+
         if (!faceInfo) {
             console.error(`Invalid face: ${face}`);
             return;
@@ -124,19 +141,38 @@ class RubiksCube {
             axis === 'y' ? 1 : 0,
             axis === 'z' ? 1 : 0
         );
-        const rotationAngle = Math.PI / 2;  
+        const rotationAngle = angle;  
         
         // Animate rotation
         let startTime = null;
+        this.isAnimating = true;
         const animateRotation = (timestamp) => {
             if (!startTime) startTime = timestamp;
+
             const elapsed = timestamp - startTime;
-            const duration = 250; // Duration of rotation in ms
+            const duration = 100 * distance; // Duration of rotation in ms
             const progress = Math.min(elapsed / duration, 1);
+
             faceGroup.rotation[axis] = rotationAngle * progress;
+
             if (progress < 1) {
                 requestAnimationFrame(animateRotation);
             }
+            else {
+                this.isAnimating = false;
+
+                // Reattach cubies to the main scene and remove the temporary group
+                selectedCubies.forEach(cubie => {
+                    sceneController.scene.attach(cubie);
+                });
+                sceneController.scene.remove(faceGroup);
+
+                console.log(`Move ${face} completed.`);
+
+                // Start next queued move
+                this.move();
+            }
+            
         };
         requestAnimationFrame(animateRotation); 
     }
