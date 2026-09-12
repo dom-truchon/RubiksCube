@@ -167,3 +167,14 @@ class RubiksCube:
             self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
 
 
+    def scramble(self, moves=1, count=1):
+        """
+        Returns 'count' sets of random moves of length 'moves'
+        """
+        # Base moves (90 deg clockwise turns)
+        move_set = list(self.MOVES.keys())
+        # 180 deg and counterclockwise turns
+        move_set += [f"{m}'" for m in move_set] + [f"{m}2" for m in move_set]
+
+        # Good for now; filter out redundant (same axis) moves later
+        return [np.random.choice(move_set, moves).tolist() for _ in range(count)]
