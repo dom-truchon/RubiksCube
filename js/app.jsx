@@ -135,14 +135,6 @@ class RubiksCube {
         });
         sceneController.scene.add(faceGroup);
         
-        // Rotate group by 90 degrees clockwise around the specified axis
-        const rotationAxis = new THREE.Vector3(
-            axis === 'x' ? 1 : 0,
-            axis === 'y' ? 1 : 0,
-            axis === 'z' ? 1 : 0
-        );
-        const rotationAngle = angle;  
-        
         // Animate rotation
         let startTime = null;
         this.isAnimating = true;
@@ -150,10 +142,10 @@ class RubiksCube {
             if (!startTime) startTime = timestamp;
 
             const elapsed = timestamp - startTime;
-            const duration = 100 * distance; // Duration of rotation in ms
+            const duration = 250 * distance; // Duration of rotation in ms
             const progress = Math.min(elapsed / duration, 1);
 
-            faceGroup.rotation[axis] = rotationAngle * progress;
+            faceGroup.rotation[axis] = angle * progress;
 
             if (progress < 1) {
                 requestAnimationFrame(animateRotation);
