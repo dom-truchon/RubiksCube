@@ -167,7 +167,7 @@ class RubiksCube:
             self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
 
 
-    def scramble(self, moves=1, count=1):
+    def scrambleSet(self, moves=1, count=1):
         """
         Returns 'count' sets of random moves of length 'moves'
         """
@@ -177,4 +177,36 @@ class RubiksCube:
         move_set += [f"{m}'" for m in move_set] + [f"{m}2" for m in move_set]
 
         # Good for now; filter out redundant (same axis) moves later
-        return [np.random.choice(move_set, moves).tolist() for _ in range(count)]
+        # return [np.random.choice(move_set, moves).tolist() for _ in range(count)]
+
+        scrambles = []
+        for _ in range(count):
+            prevMove = None
+            scramble = []
+
+            for _ in range(moves):
+                available_moves = move_set.copy()
+                if prevMove is not None:    
+                    prevFace = prevMove[0]
+                    
+                    if prevMove[0] in ["F", "B"]:
+                        available_moves = [
+                            m for m in available_moves
+                            if m[0] not in ["F", "B"]
+                        ]
+                    elif prevMove[0] in ["R", "L"]:
+                        available_moves = [
+                            m for m in available_moves
+                            if m[0] not in ["R", "L"]
+                        ]
+                    elif prevMove[0] in ["U", "D"]:
+                        available_moves = [
+                            m for m in available_moves
+                            if m[0] not in ["U", "D"]
+                        ]
+
+                currMove = str(np.random.choice(available_moves))
+                scramble.append(currMove)
+                prevMove = currMove
+            scrambles.append(scramble)
+        return scrambles
