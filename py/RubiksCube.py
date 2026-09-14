@@ -81,12 +81,15 @@ class RubiksCube:
 
     def __init__(self):
         """Sets current state to that of a solved cube"""
-        self.corner_position = np.arange(8, dtype=np.int8) # arr length 8, val 0-7
-        self.corner_orientation = np.zeros(8, dtype=np.int8) # arr length 8, val 0s
-        self.edge_position = np.arange(12, dtype=np.int8) # arr length 12, val 0-11
-        self.edge_orientation = np.zeros(12, dtype=np.int8) # arr length 12, val 0s
-        self.path = []
+        self.reset()
 
+    def reset(self):
+        """Resets the cube to its initial (solved) state"""
+        self.corner_position = np.arange(8, dtype=np.int8)
+        self.corner_orientation = np.zeros(8, dtype=np.int8)
+        self.edge_position = np.arange(12, dtype=np.int8)
+        self.edge_orientation = np.zeros(12, dtype=np.int8)
+        self.path = []
 
     def is_solved(self):
         """Compares current state to initial (solved) state"""
@@ -166,47 +169,64 @@ class RubiksCube:
             self.corner_orientation = (self.corner_orientation[cp] + co) % 3
             self.edge_orientation = (self.edge_orientation[ep] + eo) % 2
 
-
-    def scrambleSet(self, moves=1, count=1):
+    def stateKey(self):
         """
-        Returns 'count' sets of random moves of length 'moves'
+        Returns a unique key representing the current state of the cube
         """
-        # Base moves (90 deg clockwise turns)
-        move_set = list(self.MOVES.keys())
-        # 180 deg and counterclockwise turns
-        move_set += [f"{m}'" for m in move_set] + [f"{m}2" for m in move_set]
+        return (
+            tuple(self.corner_position.tolist()),
+            tuple(self.corner_orientation.tolist()),
+            tuple(self.edge_position.tolist()),
+            tuple(self.edge_orientation.tolist())
+        )
 
-        # Good for now; filter out redundant (same axis) moves later
-        # return [np.random.choice(move_set, moves).tolist() for _ in range(count)]
+# end of RubiksCube class
 
-        scrambles = []
-        for _ in range(count):
-            prevMove = None
-            scramble = []
 
-            for _ in range(moves):
-                available_moves = move_set.copy()
-                if prevMove is not None:    
-                    prevFace = prevMove[0]
-                    
-                    if prevMove[0] in ["F", "B"]:
-                        available_moves = [
-                            m for m in available_moves
-                            if m[0] not in ["F", "B"]
-                        ]
-                    elif prevMove[0] in ["R", "L"]:
-                        available_moves = [
-                            m for m in available_moves
-                            if m[0] not in ["R", "L"]
-                        ]
-                    elif prevMove[0] in ["U", "D"]:
-                        available_moves = [
-                            m for m in available_moves
-                            if m[0] not in ["U", "D"]
-                        ]
 
-                currMove = str(np.random.choice(available_moves))
-                scramble.append(currMove)
-                prevMove = currMove
-            scrambles.append(scramble)
-        return scrambles
+def randomScrambleSet(moves=1, count=1):
+    """
+    Returns 'count' sets of random moves of length 'moves'
+    """
+    # Base moves (90 deg clockwise turns)
+    move_set = list(RubiksCube.MOVES.keys())
+    # 180 deg and 90 deg counterclockwise turns
+    move_set += [f"{m}'" for m in move_set] + [f"{m}2" for m in move_set]
+
+    # Good for now; filter out redundant (same axis) moves later
+    # return [np.random.choice(move_set, moves).tolist() for _ in range(count)]
+
+    scrambles = []
+    for _ in range(count):
+        prevMove = None
+        scramble = []
+
+        for _ in range(moves):
+            available_moves = move_set.copy()
+            if prevMove is not None:    
+                prevFace = prevMove[0]
+                
+                # Filter out moves on the same axis as the previous move
+                if prevMove[0] in ["F", "B"]: # Front / Back
+                    available_moves = [
+                        m for m in available_moves
+                        if m[0] not in ["F", "B"]
+                    ]
+                elif prevMove[0] in ["R", "L"]: # Right / Left
+                    available_moves = [
+                        m for m in available_moves
+                        if m[0] not in ["R", "L"]
+                    ]
+                elif prevMove[0] in ["U", "D"]: # Top / Bottom
+                    available_moves = [
+                        m for m in available_moves
+                        if m[0] not in ["U", "D"]
+                    ]
+
+            currMove = str(np.random.choice(available_moves))
+            scramble.append(currMove)
+            prevMove = currMove
+        scrambles.append(scramble)
+    return scrambles
+
+
