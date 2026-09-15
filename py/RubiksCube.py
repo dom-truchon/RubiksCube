@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+from collections import deque
 
 class RubiksCube:
     """
@@ -229,4 +231,69 @@ def randomScrambleSet(moves=1, count=1):
         scrambles.append(scramble)
     return scrambles
 
+def cubeBFS(depth=0):
+    """Find every cube state for each depth up to 'depth'"""
 
+    # Base moves (90 deg clockwise turns)
+    move_set = list(RubiksCube.MOVES.keys())
+    # 180 deg and 90 deg counterclockwise turns
+    move_set += [f"{m}'" for m in move_set] + [f"{m}2" for m in move_set]
+
+    # Keep track of the number of found states at each depth
+        # Each entry should be <= 18^depth
+    depthCount = np.zeros(depth, dtype=np.int32)
+    # Track prev depth, for debugging
+    last_depth = 0
+
+    # Solved rubiks cube state (only state in depth 0)
+    solved = RubiksCube()
+    queue = deque([(solved, 0)])
+    # Track visited states at each depth. 
+    # If identical state is later found at higher depth, can be ignored
+    visited = { solved.stateKey() : 0 } 
+
+    while queue:
+        cube, curr_depth = queue.popleft()
+
+        # print(f"Current depth: {curr_depth}")
+
+        if(curr_depth >= depth):
+            continue
+
+        depthCount[curr_depth] += 1
+        if curr_depth != last_depth:
+            print(f"Current depth: {curr_depth} of {depth}")
+            last_depth = curr_depth
+
+        for move in move_set:
+            # Duplicate current cube state
+            curr_cube = cube.copy()
+            # Apply current move
+            curr_cube.move(move)
+
+            key = curr_cube.stateKey()
+
+            if key not in visited:
+                visited[key] = curr_depth + 1
+                queue.append((curr_cube, curr_depth + 1))
+
+    # Convert "visited" dictionary to arrays
+    keys = list(visited.keys())
+    corner_position = np.array( [key[0] for key in keys], dtype=np.int8)
+    corner_orientation = np.array([key[1] for key in keys],dtype=np.int8)
+    edge_position = np.array([key[2] for key in keys],dtype=np.int8)
+    edge_orientation = np.array([key[3] for key in keys],dtype=np.int8)
+    depths = np.array(list(visited.values()), dtype=np.int8)
+
+    # Save output to .npz file
+    np.savez_compressed(
+        "outputs/cubeBFS.npz",
+        corner_position = corner_position,
+        corner_orientation = corner_orientation,
+        edge_position = edge_position,
+        edge_orientation = edge_orientation,
+        depth = depths
+    )
+
+    print(depthCount)
+    return visited
