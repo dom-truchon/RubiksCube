@@ -2,3 +2,4 @@ cube_test.py
 __pycache__/RubiksCube.cpython-314.pyc
 node_modules/
 py/__pycache__/RubiksCube.cpython-314.pyc
+outputs/cubeBFS.npz
