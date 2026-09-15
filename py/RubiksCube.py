@@ -232,7 +232,10 @@ def randomScrambleSet(moves=1, count=1):
     return scrambles
 
 def cubeBFS(depth=0):
-    """Find every cube state for each depth up to 'depth'"""
+    """
+    Find every cube state for each depth up to 'depth'
+        Note: Memory ineffecient; Not viable past depth 7 without optimization
+    """
 
     # Base moves (90 deg clockwise turns)
     move_set = list(RubiksCube.MOVES.keys())
