@@ -274,6 +274,7 @@ def cubeBFS_v1(depth=0):
     Find every cube state for each depth up to 'depth'
         Note: Memory ineffecient; Not viable past depth 7 without optimization
         Depth 6: maxed at 12GB of RAM usage
+        Max depth 6, crashes at depth 7+
     """
 
     # Base moves (90 deg clockwise turns)
@@ -344,6 +345,8 @@ def cubeBFS_v2(depth=0):
     """
     Find every cube state for each depth up to 'depth'
         Depth 6: maxed at ~ 1GB of RAM usage
+        Depth 7: maxed at ~ 20GB of RAM usage, ~1 hour
+        Further depths will need optimization - perhaps 
     """
 
     # Base moves (90 deg clockwise turns)
@@ -362,7 +365,7 @@ def cubeBFS_v2(depth=0):
     for d in range(depth):
         next_layer = []
 
-        print(f"Current depth: {d} of {depth}")
+        print(f"Current depth: {d + 1} of {depth}")
 
         for state in current_layer:
             cube = RubiksCube.decodeState(state)
@@ -395,9 +398,11 @@ def cubeBFS_v2(depth=0):
     edge_position = states[:, 16:28].astype(np.int8) # 12 bytes
     edge_orientation = states[:, 28:40].astype(np.int8) # 12 bytes
 
+    depths = np.fromiter(visited.values(), dtype=np.int8, count=num_states)
+
     # Save output to .npz file
     np.savez_compressed(
-        "outputs/cubeBFS_v2.npz",
+        f"outputs/cubeBFS_v2__depth_{depth}.npz",
         corner_position = corner_position,
         corner_orientation = corner_orientation,
         edge_position = edge_position,
@@ -406,3 +411,9 @@ def cubeBFS_v2(depth=0):
     )
 
     return visited
+
+def cubeBFS_v3(depth=0):
+    """
+    TODO: v2 only uses 1 CPU thread, v3 should use multiprocessing to speed up the search
+    """
+    ...
