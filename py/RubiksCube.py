@@ -186,7 +186,8 @@ class RubiksCube:
         """
         Returns a byte representation of the cube state for use in hashing and storage
         """
-        corner_p, corner_o, edge_p, edge_o = self.state()
+        state = self.state()
+        corner_p, corner_o, edge_p, edge_o = state
         return (
             np.asarray(corner_p, dtype=np.uint8).tobytes()
             + np.asarray(corner_o, dtype=np.uint8).tobytes()
@@ -268,10 +269,11 @@ def randomScrambleSet(moves=1, count=1):
         scrambles.append(scramble)
     return scrambles
 
-def cubeBFS(depth=0):
+def cubeBFS_v1(depth=0):
     """
     Find every cube state for each depth up to 'depth'
         Note: Memory ineffecient; Not viable past depth 7 without optimization
+        Depth 6: maxed at 12GB of RAM usage
     """
 
     # Base moves (90 deg clockwise turns)
@@ -327,7 +329,7 @@ def cubeBFS(depth=0):
 
     # Save output to .npz file
     np.savez_compressed(
-        "outputs/cubeBFS.npz",
+        "outputs/cubeBFS_v1.npz",
         corner_position = corner_position,
         corner_orientation = corner_orientation,
         edge_position = edge_position,
@@ -338,10 +340,10 @@ def cubeBFS(depth=0):
     print(depthCount)
     return visited
 
-def cubeBFS2(depth=0):
+def cubeBFS_v2(depth=0):
     """
     Find every cube state for each depth up to 'depth'
-        Note: Memory ineffecient; Not viable past depth 7 without optimization
+        Depth 6: maxed at ~ 1GB of RAM usage
     """
 
     # Base moves (90 deg clockwise turns)
@@ -349,21 +351,13 @@ def cubeBFS2(depth=0):
     # 180 deg and 90 deg counterclockwise turns
     move_set += [f"{m}'" for m in move_set] + [f"{m}2" for m in move_set]
 
-    # Keep track of the number of found states at each depth
-        # Each entry should be <= 18^depth
-    depthCount = np.zeros(depth, dtype=np.int32)
-    # Track prev depth, for debugging
-    last_depth = 0
-
     # Solved rubiks cube state (only state in depth 0)
     solved = RubiksCube()
-    start = RubiksCube.encodeState(solved.state())
+    start = solved.encodeState()
 
     # Track visited states at each depth. 
-    visited = { start } 
+    visited = { start : 0 } 
     current_layer = [ start ]
-    all_states = [ start ]
-    depths = [ 0 ]
 
     for d in range(depth):
         next_layer = []
@@ -374,55 +368,36 @@ def cubeBFS2(depth=0):
             cube = RubiksCube.decodeState(state)
 
             for move in move_set:
-                # Duplicate current cube state
+                # Duplicate current cube state and pply current move
                 curr_cube = cube.copy()
-                # Apply current move
                 curr_cube.move(move)
 
-                key = curr_cube.state()
+                key = curr_cube.encodeState()
 
                 if key not in visited:
-                    visited[key] = curr_depth + 1
-                    queue.append((curr_cube, curr_depth + 1))
+                    visited[key] = d + 1
+                    next_layer.append(key)
 
+        print(f"Found {len(next_layer):,} states at depth {d + 1}")
+        current_layer = next_layer
 
+    print("Writing to file...")
 
-    while queue:
-        cube, curr_depth = queue.popleft()
+    # Convert encoded states directly to arrays
+    num_states = len(visited)
+    states = np.frombuffer(
+        b"".join(visited.keys()),
+        dtype=np.uint8
+    ).reshape(num_states, 40)
 
-        print(f"Current depth: {curr_depth}")
-
-        if(curr_depth >= depth):
-            continue
-
-        depthCount[curr_depth] += 1
-        if curr_depth != last_depth:
-            print(f"Current depth: {curr_depth} of {depth}")
-            last_depth = curr_depth
-
-        for move in move_set:
-            # Duplicate current cube state
-            curr_cube = cube.copy()
-            # Apply current move
-            curr_cube.move(move)
-
-            key = curr_cube.state()
-
-            if key not in visited:
-                visited[key] = curr_depth + 1
-                queue.append((curr_cube, curr_depth + 1))
-
-    # Convert "visited" dictionary to arrays
-    keys = list(visited.keys())
-    corner_position = np.array( [key[0] for key in keys], dtype=np.int8)
-    corner_orientation = np.array([key[1] for key in keys],dtype=np.int8)
-    edge_position = np.array([key[2] for key in keys],dtype=np.int8)
-    edge_orientation = np.array([key[3] for key in keys],dtype=np.int8)
-    depths = np.array(list(visited.values()), dtype=np.int8)
+    corner_position = states[:, 0:8].astype(np.int8) # 8 bytes
+    corner_orientation = states[:, 8:16].astype(np.int8) # 8 bytes
+    edge_position = states[:, 16:28].astype(np.int8) # 12 bytes
+    edge_orientation = states[:, 28:40].astype(np.int8) # 12 bytes
 
     # Save output to .npz file
     np.savez_compressed(
-        "outputs/cubeBFS.npz",
+        "outputs/cubeBFS_v2.npz",
         corner_position = corner_position,
         corner_orientation = corner_orientation,
         edge_position = edge_position,
@@ -430,5 +405,4 @@ def cubeBFS2(depth=0):
         depth = depths
     )
 
-    print(depthCount)
     return visited
